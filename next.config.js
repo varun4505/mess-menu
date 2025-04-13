@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Removing the 'output: export' setting to enable API routes
   images: {
     unoptimized: true,
   },
   trailingSlash: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
+  // swcMinify is now enabled by default in newer Next.js versions
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;
