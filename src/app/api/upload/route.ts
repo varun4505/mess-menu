@@ -10,29 +10,7 @@ interface MenuItem {
   menuItems: string[];
 }
 
-// Add OPTIONS handler for CORS preflight requests
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
-}
-
 export async function POST(request: NextRequest) {
-  // Add CORS headers to the response
-  const response = await handlePostRequest(request);
-  response.headers.set('Access-Control-Allow-Origin', '*');
-  response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  return response;
-}
-
-async function handlePostRequest(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -102,10 +80,7 @@ async function handlePostRequest(request: NextRequest) {
         filter: { date: item.date, day: item.day, mealType: item.mealType },
         update: { $set: item },
         upsert: true,
-      },
-    }));
-
-    try {
+      },    }));    try {
       const result = await Menu.bulkWrite(operations);
       console.log('MongoDB operation result:', result);
 
@@ -113,9 +88,9 @@ async function handlePostRequest(request: NextRequest) {
         message: 'Menu data uploaded successfully',
         count: menuItems.length,
       });
-    } catch (error: any) {
-      if (error.code === 11000) {
-        console.error('Duplicate key error:', error.message);
+    } catch (error: unknown) {      const mongoError = error as { code?: number; message: string };
+      if (mongoError.code === 11000) {
+        console.error('Duplicate key error:', mongoError.message);
         
         // Handle duplicates by doing individual upserts with overwrite
         for (const item of menuItems) {
